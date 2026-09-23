@@ -16,6 +16,7 @@ router.use((req, res, next) => {
 });
 
 const str = (v, max) => String(v == null ? "" : v).trim().slice(0, max);
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const intId = v => {
   const n = Number(v);
   if (!Number.isInteger(n) || n < 1) throw new UserError("Not found.", 404);
@@ -53,6 +54,21 @@ router.get("/me", (req, res) => {
     storage: { configured: media.isConfigured(), name: media.storageName() },
     limits: { adminUploadMb: config.limits.adminUploadMb }
   });
+});
+
+router.patch("/profile", async (req, res) => {
+  const name = str(req.body && req.body.name, 160);
+  const email = str(req.body && req.body.email, 255).toLowerCase();
+  const current = String((req.body && req.body.current) || "");
+  if (!EMAIL_RE.test(email)) throw new UserError("Enter a valid login email.");
+  const ok = await auth.verifyLogin(req.admin.email, current);
+  if (!ok) throw new UserError("The current password is not correct.");
+  const exists = await query("SELECT id FROM admins WHERE email = ? AND id <> ?", [email, req.admin.id]);
+  if (exists.rows[0]) throw new UserError("Another admin already uses that email.");
+  await query("UPDATE admins SET email = ?, name = ?, token_version = token_version + 1 WHERE id = ?", [email, name, req.admin.id]);
+  const { rows } = await query("SELECT * FROM admins WHERE id = ?", [req.admin.id]);
+  auth.issue(res, rows[0]);
+  res.json({ admin: { email: rows[0].email, name: rows[0].name } });
 });
 
 router.post("/password", async (req, res) => {

@@ -8,6 +8,7 @@ const host = "127.0.0.1";
 let loggedIn = false;
 let nextReviewId = 2;
 let nextGalleryId = 2;
+let previewAdmin = { email: "preview@earthsar.local", name: "Preview Admin" };
 let siteSettings = {
   stats: {
     years: "10",
@@ -30,6 +31,19 @@ let siteSettings = {
     cardText: "Right property, right time, right return.",
     image: "assets/hero-property.jpg",
     imageAlt: "Luxury modern real estate property with infinity pool at sunset"
+  },
+  seo: {
+    title: "earthsar | Real Estate Advisory in Gurugram & Delhi NCR",
+    description: "earthsar offers transparent real estate advisory in Gurugram and Delhi NCR for home buying, investments, commercial property, selling and leasing.",
+    keywords: "real estate advisory Gurugram, property advisor Delhi NCR, commercial property Gurugram, home buying advisor, earthsar",
+    canonicalUrl: "",
+    robots: "index, follow, max-image-preview:large",
+    ogTitle: "earthsar | Real Estate Advisory in Gurugram & Delhi NCR",
+    ogDescription: "Smart advice, honest conversations and long-term real estate relationships across Gurugram and Delhi NCR.",
+    ogImage: "assets/hero-property.jpg",
+    ogImageAlt: "Luxury modern real estate property with infinity pool at sunset",
+    twitterTitle: "earthsar | Real Estate Advisory in Gurugram & Delhi NCR",
+    twitterDescription: "Transparent real estate advisory for homes, investments, commercial property, selling and leasing."
   },
   team: [
     {
@@ -264,12 +278,13 @@ function adminApi(req, res, pathname, searchParams) {
   if (req.method === "POST" && pathname === "/api/admin/login") {
     return readJson(req, body => {
       loggedIn = true;
+      previewAdmin.email = body.email || previewAdmin.email;
       res.writeHead(200, {
         "content-type": "application/json; charset=utf-8",
         "cache-control": "no-cache",
         "set-cookie": "es_preview_admin=1; Path=/; SameSite=Lax"
       });
-      res.end(JSON.stringify({ admin: { email: body.email || "preview@earthsar.local", name: "Preview Admin" } }));
+      res.end(JSON.stringify({ admin: previewAdmin }));
     });
   }
 
@@ -287,9 +302,19 @@ function adminApi(req, res, pathname, searchParams) {
 
   if (req.method === "GET" && pathname === "/api/admin/me") {
     return json(res, 200, {
-      admin: { email: "preview@earthsar.local", name: "Preview Admin" },
+      admin: previewAdmin,
       storage: { configured: true, name: "Preview storage" },
       limits: { adminUploadMb: 100 }
+    });
+  }
+
+  if (req.method === "PATCH" && pathname === "/api/admin/profile") {
+    return readJson(req, body => {
+      previewAdmin = {
+        email: String(body.email || previewAdmin.email).trim().toLowerCase(),
+        name: String(body.name || "").trim()
+      };
+      json(res, 200, { admin: previewAdmin });
     });
   }
 

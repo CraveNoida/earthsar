@@ -21,6 +21,19 @@ const DEFAULT_SITE_SETTINGS = {
     image: "assets/hero-property.jpg",
     imageAlt: "Luxury modern real estate property with infinity pool at sunset"
   },
+  seo: {
+    title: "earthsar | Real Estate Advisory in Gurugram & Delhi NCR",
+    description: "earthsar offers transparent real estate advisory in Gurugram and Delhi NCR for home buying, investments, commercial property, selling and leasing.",
+    keywords: "real estate advisory Gurugram, property advisor Delhi NCR, commercial property Gurugram, home buying advisor, earthsar",
+    canonicalUrl: "",
+    robots: "index, follow, max-image-preview:large",
+    ogTitle: "earthsar | Real Estate Advisory in Gurugram & Delhi NCR",
+    ogDescription: "Smart advice, honest conversations and long-term real estate relationships across Gurugram and Delhi NCR.",
+    ogImage: "assets/hero-property.jpg",
+    ogImageAlt: "Luxury modern real estate property with infinity pool at sunset",
+    twitterTitle: "earthsar | Real Estate Advisory in Gurugram & Delhi NCR",
+    twitterDescription: "Transparent real estate advisory for homes, investments, commercial property, selling and leasing."
+  },
   team: [
     {
       name: "Mr. Naveen Sharma",
@@ -89,6 +102,23 @@ function cleanHero(hero = {}) {
   };
 }
 
+function cleanSeo(seo = {}) {
+  const robots = text(seo.robots, 120) || DEFAULT_SITE_SETTINGS.seo.robots;
+  return {
+    title: text(seo.title, 90),
+    description: text(seo.description, 180),
+    keywords: text(seo.keywords, 400),
+    canonicalUrl: text(seo.canonicalUrl, 300),
+    robots,
+    ogTitle: text(seo.ogTitle, 90),
+    ogDescription: text(seo.ogDescription, 220),
+    ogImage: text(seo.ogImage, 300),
+    ogImageAlt: text(seo.ogImageAlt, 180),
+    twitterTitle: text(seo.twitterTitle, 90),
+    twitterDescription: text(seo.twitterDescription, 220)
+  };
+}
+
 function cleanTeam(team = []) {
   return (Array.isArray(team) ? team : []).slice(0, 4).map(member => ({
     name: text(member.name, 120),
@@ -105,6 +135,7 @@ function sanitizeSiteSettings(input = {}) {
     stats: cleanStats({ ...DEFAULT_SITE_SETTINGS.stats, ...(input.stats || {}) }),
     contact: cleanContact({ ...DEFAULT_SITE_SETTINGS.contact, ...(input.contact || {}) }),
     hero: cleanHero({ ...DEFAULT_SITE_SETTINGS.hero, ...(input.hero || {}) }),
+    seo: cleanSeo({ ...DEFAULT_SITE_SETTINGS.seo, ...(input.seo || {}) }),
     team: cleanTeam(input.team && input.team.length ? input.team : DEFAULT_SITE_SETTINGS.team)
   };
 }

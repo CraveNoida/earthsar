@@ -13,6 +13,41 @@ const safeUrl=u=>{try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.h
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),3200)}
 $("#yr").textContent=new Date().getFullYear();
 
+function setMeta(selector, attr, value){
+  if(!value)return;
+  let el=document.head.querySelector(selector);
+  if(!el){
+    el=document.createElement(selector.startsWith("link")?"link":"meta");
+    if(selector.includes("[name="))el.setAttribute("name",(selector.match(/\[name="([^"]+)"/)||[])[1]||"");
+    if(selector.includes("[property="))el.setAttribute("property",(selector.match(/\[property="([^"]+)"/)||[])[1]||"");
+    if(selector.startsWith("link"))el.setAttribute("rel",(selector.match(/\[rel="([^"]+)"/)||[])[1]||"canonical");
+    document.head.appendChild(el);
+  }
+  el.setAttribute(attr,value);
+}
+function absoluteAsset(url){
+  if(!url)return "";
+  try{return new URL(url,location.origin+"/").href}catch(e){return url}
+}
+function applySEO(seo){
+  if(!seo)return;
+  const title=seo.title||seo.ogTitle||seo.twitterTitle;
+  const desc=seo.description||seo.ogDescription||seo.twitterDescription;
+  if(title)document.title=title;
+  setMeta('meta[name="description"]',"content",desc);
+  setMeta('meta[name="keywords"]',"content",seo.keywords);
+  setMeta('meta[name="robots"]',"content",seo.robots);
+  setMeta('link[rel="canonical"]',"href",seo.canonicalUrl||location.origin+location.pathname);
+  setMeta('meta[property="og:url"]',"content",seo.canonicalUrl||location.origin+location.pathname);
+  setMeta('meta[property="og:title"]',"content",seo.ogTitle||title);
+  setMeta('meta[property="og:description"]',"content",seo.ogDescription||desc);
+  setMeta('meta[property="og:image"]',"content",absoluteAsset(seo.ogImage||S.hero.image));
+  setMeta('meta[property="og:image:alt"]',"content",seo.ogImageAlt||S.hero.alt);
+  setMeta('meta[name="twitter:title"]',"content",seo.twitterTitle||seo.ogTitle||title);
+  setMeta('meta[name="twitter:description"]',"content",seo.twitterDescription||seo.ogDescription||desc);
+  setMeta('meta[name="twitter:image"]',"content",absoluteAsset(seo.ogImage||S.hero.image));
+}
+
 /* ================= THEME ================= */
 const themeMedia=matchMedia("(prefers-color-scheme: dark)");
 function storedTheme(){try{return localStorage.getItem("earthsar-theme")||""}catch(e){return ""}}
@@ -64,6 +99,7 @@ async function loadSiteSettings(){
     if(x.contact||x.stats)S.settings=Object.assign({},S.settings,x.stats||{},x.contact||{});
     if(x.hero)S.hero=Object.assign({},S.hero,x.hero,{image:x.hero.image||"",alt:x.hero.imageAlt||x.hero.alt||S.hero.alt});
     if(Array.isArray(x.team))S.team=x.team;
+    applySEO(x.seo);
     renderHeroContent();renderHero();renderStats();renderContact();renderTeam();
   }catch(e){}
 }

@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs/promises");
 const express = require("express");
 const helmet = require("helmet");
 const compression = require("compression");
@@ -6,7 +7,9 @@ const cookieParser = require("cookie-parser");
 const multer = require("multer");
 const config = require("./config");
 const { migrate } = require("./db");
+const { query } = require("./db");
 const { bootstrapAdmin } = require("./auth");
+const { sanitizeSiteSettings } = require("./site-settings");
 
 const app = express();
 const PUBLIC = path.join(__dirname, "..", "public");
@@ -44,6 +47,85 @@ function siteOrigin(req) {
   return config.siteUrl || `${req.protocol}://${req.get("host")}`;
 }
 
+function escapeHtml(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function absoluteUrl(value, origin) {
+  if (!value) return "";
+  try {
+    return new URL(value, origin + "/").href;
+  } catch {
+    return value;
+  }
+}
+
+async function readPublicSettings() {
+  const { rows } = await query("SELECT setting_value FROM site_settings WHERE setting_key = 'site'");
+  let saved = {};
+  if (rows[0]) {
+    try {
+      saved = typeof rows[0].setting_value === "string" ? JSON.parse(rows[0].setting_value) : rows[0].setting_value;
+    } catch {
+      saved = {};
+    }
+  }
+  return sanitizeSiteSettings(saved);
+}
+
+function upsertMeta(html, selector, value) {
+  if (!value) return html;
+  const content = escapeHtml(value);
+  if (selector.type === "name") {
+    const re = new RegExp(`<meta\\s+name=["']${selector.key}["'][^>]*>`, "i");
+    const tag = `<meta name="${selector.key}" content="${content}">`;
+    return re.test(html) ? html.replace(re, tag) : html.replace("</head>", `${tag}\n</head>`);
+  }
+  if (selector.type === "property") {
+    const re = new RegExp(`<meta\\s+property=["']${selector.key}["'][^>]*>`, "i");
+    const tag = `<meta property="${selector.key}" content="${content}">`;
+    return re.test(html) ? html.replace(re, tag) : html.replace("</head>", `${tag}\n</head>`);
+  }
+  const re = /<link\s+rel=["']canonical["'][^>]*>/i;
+  const tag = `<link rel="canonical" href="${content}">`;
+  return re.test(html) ? html.replace(re, tag) : html.replace("</head>", `${tag}\n</head>`);
+}
+
+async function indexHtml(req) {
+  let html = await fs.readFile(path.join(PUBLIC, "index.html"), "utf8");
+  const settings = await readPublicSettings();
+  const seo = settings.seo || {};
+  const origin = siteOrigin(req);
+  const title = seo.title || seo.ogTitle || seo.twitterTitle;
+  const description = seo.description || seo.ogDescription || seo.twitterDescription;
+  const canonical = seo.canonicalUrl || `${origin}/`;
+  const image = absoluteUrl(seo.ogImage || settings.hero.image, origin);
+
+  if (title) html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
+  html = upsertMeta(html, { type: "name", key: "description" }, description);
+  html = upsertMeta(html, { type: "name", key: "keywords" }, seo.keywords);
+  html = upsertMeta(html, { type: "name", key: "robots" }, seo.robots);
+  html = upsertMeta(html, { type: "link", key: "canonical" }, canonical);
+  html = upsertMeta(html, { type: "property", key: "og:url" }, canonical);
+  html = upsertMeta(html, { type: "property", key: "og:title" }, seo.ogTitle || title);
+  html = upsertMeta(html, { type: "property", key: "og:description" }, seo.ogDescription || description);
+  html = upsertMeta(html, { type: "property", key: "og:image" }, image);
+  html = upsertMeta(html, { type: "property", key: "og:image:alt" }, seo.ogImageAlt || settings.hero.imageAlt);
+  html = upsertMeta(html, { type: "name", key: "twitter:title" }, seo.twitterTitle || seo.ogTitle || title);
+  html = upsertMeta(html, { type: "name", key: "twitter:description" }, seo.twitterDescription || seo.ogDescription || description);
+  html = upsertMeta(html, { type: "name", key: "twitter:image" }, image);
+  return html;
+}
+
+async function sendIndex(req, res, next) {
+  try {
+    res.set("Cache-Control", "no-cache");
+    res.type("html").send(await indexHtml(req));
+  } catch (err) {
+    next(err);
+  }
+}
+
 app.get("/robots.txt", (req, res) => {
   const origin = siteOrigin(req);
   res.type("text/plain").send(`User-agent: *
@@ -76,6 +158,7 @@ app.use("/admin", (req, res, next) => {
   res.set("X-Robots-Tag", "noindex, nofollow");
   next();
 });
+app.get(["/", "/index.html"], sendIndex);
 app.use(
   express.static(PUBLIC, {
     extensions: ["html"],
@@ -86,7 +169,7 @@ app.use(
     }
   })
 );
-app.use((req, res) => res.status(404).sendFile(path.join(PUBLIC, "index.html")));
+app.use(sendIndex);
 
 // One place that turns errors into JSON the front end can show.
 app.use((err, req, res, next) => {

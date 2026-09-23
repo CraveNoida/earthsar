@@ -443,8 +443,16 @@ main.addEventListener("focusout", async e => {
 
 /* ================= SETTINGS ================= */
 async function pageSettings() {
-  main.innerHTML = `<div class="ph"><div><h1>Website Settings</h1><p>Edit the website's contact details, homepage message, stats and advisor cards.</p></div><a class="btn btn-secondary" href="/" target="_blank" rel="noopener">View website</a></div>
+  main.innerHTML = `<div class="ph"><div><h1>Website Settings</h1><p>Edit contact details, homepage content, advisor cards and SEO metadata.</p></div><a class="btn btn-secondary" href="/" target="_blank" rel="noopener">View website</a></div>
     <div id="settingsBox"><div class="loading">Loading website settings...</div></div>
+    <form class="panel acc-card" id="profileForm" novalidate>
+      <h2>Admin username</h2>
+      <p style="color:var(--muted)">Change the login username/email used for this admin panel.</p>
+      <div class="fld"><label for="u-name">Display name</label><input id="u-name" autocomplete="name" maxlength="160" value="${esc(state.me.admin.name || "")}"></div>
+      <div class="fld"><label for="u-email">Login username / email</label><input id="u-email" type="email" autocomplete="username" maxlength="255" value="${esc(state.me.admin.email || "")}" required></div>
+      <div class="fld"><label for="u-current">Current password</label><input id="u-current" type="password" autocomplete="current-password" required><div class="hint">Required before changing the admin username.</div></div>
+      <div class="form-foot" style="margin-top:0"><span class="note-err" id="uErr" role="alert"></span><button class="btn btn-primary" type="submit">Save admin username</button></div>
+    </form>
     <form class="panel acc-card" id="pwForm" novalidate>
       <h2>Change password</h2>
       <div class="fld"><label for="p-cur">Current password</label><input id="p-cur" type="password" autocomplete="current-password"></div>
@@ -458,6 +466,16 @@ async function pageSettings() {
   } catch (err) {
     $("#settingsBox").innerHTML = `<div class="panel empty-state"><b>Settings could not be loaded</b>${esc(err.message)}</div>`;
   }
+  $("#profileForm").onsubmit = async e => {
+    e.preventDefault(); $("#uErr").textContent = "";
+    try {
+      const d = await api("PATCH", "/profile", { name: $("#u-name").value, email: $("#u-email").value, current: $("#u-current").value });
+      state.me.admin = d.admin;
+      $("#whoami").textContent = d.admin.email;
+      $("#u-current").value = "";
+      toast("Admin username saved.");
+    } catch (err) { $("#uErr").textContent = err.message; }
+  };
   $("#pwForm").onsubmit = async e => {
     e.preventDefault(); $("#pErr").textContent = "";
     try { await api("POST", "/password", { current: $("#p-cur").value, next: $("#p-new").value }); $("#pwForm").reset(); toast("Password changed."); }
@@ -491,7 +509,7 @@ function advisorEditor(member, i) {
 }
 
 function drawSettingsForm() {
-  const s = state.settings || {}, c = s.contact || {}, st = s.stats || {}, h = s.hero || {}, team = s.team || [];
+  const s = state.settings || {}, c = s.contact || {}, st = s.stats || {}, h = s.hero || {}, seo = s.seo || {}, team = s.team || [];
   const phone = c.phone || c.whatsapp || "+91 890 176 0000";
   const whatsapp = c.whatsapp || c.phone || "+91 890 176 0000";
   const email = c.email || "earthzgroup@gmail.com";
@@ -525,6 +543,23 @@ function drawSettingsForm() {
         ${settingsField("Years", "stats.years", st.years, { max: 12 })}
         ${settingsField("Satisfaction", "stats.satisfaction", st.satisfaction, { max: 12 })}
         ${settingsField("Properties sold", "stats.properties", st.properties, { max: 12 })}
+      </div>
+    </section>
+    <section>
+      <h2>SEO Optimization</h2>
+      <div class="notice">These fields control how the homepage appears in Google and when the website link is shared on WhatsApp, LinkedIn or other social platforms.</div>
+      <div class="form-grid">
+        ${settingsField("SEO title", "seo.title", seo.title, { full: true, max: 90, hint: "Best around 50-60 characters. Example: earthsar | Real Estate Advisory in Gurugram" })}
+        ${settingsField("SEO description", "seo.description", seo.description, { full: true, area: true, rows: 3, max: 180, hint: "Best around 140-160 characters. This is often shown below the title in Google." })}
+        ${settingsField("Keywords", "seo.keywords", seo.keywords, { full: true, area: true, rows: 2, max: 400, hint: "Comma-separated target phrases, such as real estate advisor Gurugram, property consultant Delhi NCR." })}
+        ${settingsField("Canonical URL", "seo.canonicalUrl", seo.canonicalUrl, { full: true, type: "url", max: 300, hint: "Optional. Add the final live URL after hosting, for example https://earthsar.com/." })}
+        ${settingsField("Robots", "seo.robots", seo.robots || "index, follow, max-image-preview:large", { max: 120, hint: "Use index, follow for public pages. Use noindex, nofollow only if you want to hide the site from search." })}
+        ${settingsField("Social share image", "seo.ogImage", seo.ogImage || h.image, { max: 300, hint: "Image shown when sharing the link. Use an existing path such as assets/hero-property.jpg." })}
+        ${settingsField("Social title", "seo.ogTitle", seo.ogTitle || seo.title, { full: true, max: 90 })}
+        ${settingsField("Social description", "seo.ogDescription", seo.ogDescription || seo.description, { full: true, area: true, rows: 2, max: 220 })}
+        ${settingsField("Social image alt text", "seo.ogImageAlt", seo.ogImageAlt || h.imageAlt, { full: true, max: 180 })}
+        ${settingsField("Twitter/X title", "seo.twitterTitle", seo.twitterTitle || seo.ogTitle || seo.title, { max: 90 })}
+        ${settingsField("Twitter/X description", "seo.twitterDescription", seo.twitterDescription || seo.ogDescription || seo.description, { full: true, area: true, rows: 2, max: 220 })}
       </div>
     </section>
     <section>
@@ -582,6 +617,19 @@ async function saveSettingsForm(e) {
       years: settingsValue(form, "stats.years"),
       satisfaction: settingsValue(form, "stats.satisfaction"),
       properties: settingsValue(form, "stats.properties")
+    },
+    seo: {
+      title: settingsValue(form, "seo.title"),
+      description: settingsValue(form, "seo.description"),
+      keywords: settingsValue(form, "seo.keywords"),
+      canonicalUrl: settingsValue(form, "seo.canonicalUrl"),
+      robots: settingsValue(form, "seo.robots") || "index, follow, max-image-preview:large",
+      ogTitle: settingsValue(form, "seo.ogTitle"),
+      ogDescription: settingsValue(form, "seo.ogDescription"),
+      ogImage: settingsValue(form, "seo.ogImage"),
+      ogImageAlt: settingsValue(form, "seo.ogImageAlt"),
+      twitterTitle: settingsValue(form, "seo.twitterTitle"),
+      twitterDescription: settingsValue(form, "seo.twitterDescription")
     },
     team: [0, 1, 2, 3].map(i => ({
       name: settingsValue(form, `team.${i}.name`),
