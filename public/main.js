@@ -13,6 +13,26 @@ const safeUrl=u=>{try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.h
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),3200)}
 $("#yr").textContent=new Date().getFullYear();
 
+function initCursorRing(){
+  const ring=$("#cursorRing");
+  if(!ring||reduce||!matchMedia("(hover: hover) and (pointer: fine)").matches)return;
+  let x=innerWidth/2,y=innerHeight/2,tx=x,ty=y,running=false;
+  const paint=()=>{
+    x+=(tx-x)*.22;y+=(ty-y)*.22;
+    ring.style.left=x+"px";ring.style.top=y+"px";
+    requestAnimationFrame(paint);
+  };
+  addEventListener("pointermove",e=>{
+    tx=e.clientX;ty=e.clientY;
+    ring.classList.add("on");
+    if(!running){running=true;x=tx;y=ty;requestAnimationFrame(paint)}
+  },{passive:true});
+  addEventListener("pointerdown",()=>ring.classList.add("down"),{passive:true});
+  addEventListener("pointerup",()=>ring.classList.remove("down"),{passive:true});
+  addEventListener("pointerleave",()=>ring.classList.remove("on"));
+  addEventListener("blur",()=>ring.classList.remove("on"));
+}
+
 function setMeta(selector, attr, value){
   if(!value)return;
   let el=document.head.querySelector(selector);
@@ -80,6 +100,7 @@ document.addEventListener("click",e=>{
 });
 themeMedia.addEventListener("change",()=>{if(!storedTheme())paintThemeToggle()});
 paintThemeToggle();
+initCursorRing();
 
 
 /* ================= STATE ================= */

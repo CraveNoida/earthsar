@@ -155,11 +155,10 @@ p{margin:0}
 .hero-card .ic{width:44px;height:44px;border-radius:12px;background:var(--soft-blue);display:grid;place-items:center;flex:none}
 .hero-card b{display:block;font-family:var(--f-head);color:var(--heading);font-weight:600;font-size:16px;line-height:1.3}
 .hero-card span{font-size:13.5px;color:var(--muted);line-height:1.45;display:block;margin-top:2px}
-.hero-dot{position:absolute;right:-14px;top:40px;width:84px;height:84px;border-radius:50%;border:2px solid var(--es-orange);opacity:.9}
 .hero-load{opacity:0;transform:translateY(14px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
 .loaded .hero-load{opacity:1;transform:none}
 .loaded .hero-load.d2{transition-delay:.12s}.loaded .hero-load.d3{transition-delay:.24s}.loaded .hero-load.d4{transition-delay:.36s}
-@media (max-width:900px){.hero-grid{grid-template-columns:1fr}.hero-art{max-width:520px}.hero-card{left:14px;bottom:14px}.hero-dot{right:10px}}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr}.hero-art{max-width:520px}.hero-card{left:14px;bottom:14px}}
 
 /* ---------- stats ---------- */
 .stats{padding:0 0 clamp(64px,8vw,96px)}
@@ -508,6 +507,10 @@ p{margin:0}
 
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:10px;font-weight:600;font-size:14.5px;z-index:200;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;border-left:3px solid var(--es-orange)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
+.cursor-ring{position:fixed;left:0;top:0;width:34px;height:34px;border:2px solid var(--es-orange);border-radius:50%;pointer-events:none;z-index:250;opacity:0;transform:translate(-50%,-50%) scale(.88);transition:opacity .18s ease,transform .16s ease,background-color .16s ease,border-color .16s ease;will-change:left,top,transform}
+.cursor-ring.on{opacity:.85;transform:translate(-50%,-50%) scale(1)}
+.cursor-ring.down{background:rgba(241,119,10,.16);border-color:var(--heading);transform:translate(-50%,-50%) scale(.72)}
+@media (hover:none),(pointer:coarse),(prefers-reduced-motion:reduce){.cursor-ring{display:none}}
 
 /* ---------- gallery & client media ---------- */
 [hidden]{display:none!important}
@@ -578,7 +581,6 @@ p{margin:0}
   .hero-frame{aspect-ratio:4/3;border-radius:14px}
   .hero-card{position:static;max-width:none;margin-top:12px;padding:13px 14px}
   .hero-card .ic{width:38px;height:38px}
-  .hero-dot{display:none}
   .stats{padding:0 0 50px}
   .stat{padding:22px 16px 20px}
   .stat-num{font-size:34px}
