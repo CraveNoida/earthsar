@@ -246,8 +246,13 @@ function renderTeam(){
   if(!S.team.length){
     g.innerHTML=[1,2,3].map(()=>`<article class="card member ph"><div class="member-photo"><span class="ini">${icon("i-user")}</span></div><div class="member-body"><h3>Advisor name</h3><div class="role">Designation</div><div class="div"></div><p>Placeholder profile — add real team members in js/config.js.</p></div></article>`).join("");
     $$(".member.ph .ini svg",g).forEach(s=>{s.style.width="64px";s.style.height="64px";s.style.color="var(--heading)"});return}
-  g.innerHTML=S.team.map((m,idx)=>{
-    return `<article class="card card-hover member reveal in"><div class="member-photo">${m.photo?`<img src="${esc(m.photo)}" alt="${esc(m.name)}" loading="lazy">`:`<span class="ini">${esc(initials(m.name))}</span>`}</div><div class="member-body"><h3>${esc(m.name)}</h3><div class="role">${esc(m.role)}</div><div class="div"></div>${m.experience?`<div class="xp">${esc(m.experience)}</div>`:""}<button class="btn btn-secondary member-read" type="button" data-team="${idx}">Read more</button></div></article>`;
+  const ordered=S.team.map((m,idx)=>({m,idx})).sort((a,b)=>{
+    const an=/\bnaveen\b/i.test(a.m.name||""),bn=/\bnaveen\b/i.test(b.m.name||"");
+    return an===bn?0:an?-1:1;
+  });
+  g.innerHTML=ordered.map(({m,idx},pos)=>{
+    const featured=pos===0&&/\bnaveen\b/i.test(m.name||"");
+    return `<article class="card card-hover member${featured?" member-featured":""} reveal in"><div class="member-photo">${m.photo?`<img src="${esc(m.photo)}" alt="${esc(m.name)}" loading="lazy">`:`<span class="ini">${esc(initials(m.name))}</span>`}</div><div class="member-body"><h3>${esc(m.name)}</h3><div class="role">${esc(m.role)}</div><div class="div"></div>${m.experience?`<div class="xp">${esc(m.experience)}</div>`:""}<button class="btn btn-secondary member-read" type="button" data-team="${idx}">Read more</button></div></article>`;
   }).join("");
 }
 function openTeamModal(i){

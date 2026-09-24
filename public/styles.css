@@ -303,8 +303,15 @@ p{margin:0}
 .member .li svg{width:18px;height:18px}
 .member.ph{box-shadow:none;border-style:dashed;background:transparent}
 .member.ph h3,.member.ph .role{color:var(--faint)}
-@media (max-width:1120px){.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:700px){.team-grid{grid-template-columns:1fr;gap:20px}.member p{-webkit-line-clamp:6}}
+.member-featured{grid-column:1/-1;display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);min-height:0}
+.member-featured .member-photo{aspect-ratio:auto;min-height:300px}
+.member-featured .member-body{justify-content:center}
+.member-featured h3{font-size:clamp(28px,3vw,38px)}
+.member-featured .role{font-size:17px}
+.member-featured .xp{font-size:14px}
+.member-featured .member-read{width:auto;align-self:flex-start;padding-inline:28px}
+@media (max-width:1120px){.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.member-featured{grid-template-columns:minmax(220px,300px) minmax(0,1fr)}}
+@media (max-width:700px){.team-grid{grid-template-columns:1fr;gap:16px}.member p{-webkit-line-clamp:6}.member-featured{display:flex;grid-column:auto}.member-featured .member-photo{aspect-ratio:16/11;min-height:0}.member-featured h3{font-size:21px}.member-featured .role{font-size:14.5px}.member-featured .member-read{width:100%;align-self:stretch;padding-inline:16px}}
 .modal-box.advisor-profile{width:min(900px,100%);max-height:min(760px,calc(100vh - 40px))}
 .advisor-modal{display:grid;grid-template-columns:170px minmax(0,1fr);gap:26px;align-items:start}
 .advisor-modal-photo{aspect-ratio:4/5;border-radius:var(--r);overflow:hidden;background:var(--soft-blue)}
@@ -556,84 +563,97 @@ p{margin:0}
 /* ---------- mobile polish ---------- */
 @media (max-width:560px){
   body{font-size:15.5px;line-height:1.58}
-  .wrap{width:calc(100vw - 32px);max-width:100%}
-  .sec{padding:56px 0}
-  .sec-head{margin-bottom:30px}
-  .h2{font-size:30px;max-width:18ch}
-  .lede{font-size:16px;margin-top:12px}
+  .wrap{width:calc(100vw - 28px);max-width:100%}
+  .sec{padding:44px 0}
+  .sec-head{margin-bottom:22px}
+  .h2{font-size:28px;max-width:19ch;line-height:1.12}
+  .lede{font-size:15.5px;margin-top:10px;line-height:1.55}
   .eyebrow{font-size:12px;margin-bottom:12px;letter-spacing:.12em}
   .hdr-in{height:72px;gap:12px}
   .hdr-in{justify-content:space-between}
   .hdr .brand-logo{width:160px}
   .theme-toggle{margin-left:auto}
   .menu-btn{width:42px;height:42px}
-  .hero{padding:30px 0 54px}
+  .hero{padding:24px 0 42px}
   .hero::before{width:360px;height:360px;right:-190px;top:64px;opacity:.65}
-  .hero-grid{gap:28px;justify-items:start}
-  .hero-grid>div:first-child,.hero p.lead,.hero-ctas,.trust-list,.hero-art{width:100%;max-width:330px}
-  .hero h1{font-size:37px;line-height:1.06}
-  .hero-rule{margin:20px 0 18px}
-  .hero p.lead{font-size:16.5px;line-height:1.58;max-width:none}
-  .hero-ctas{display:grid;grid-template-columns:1fr;gap:10px;margin-top:24px}
+  .hero-grid{gap:22px;justify-items:start}
+  .hero-grid>div:first-child,.hero p.lead,.hero-ctas,.trust-list,.hero-art{width:100%;max-width:100%}
+  .hero h1{font-size:34px;line-height:1.05}
+  .hero-rule{margin:16px 0 14px}
+  .hero p.lead{font-size:15.8px;line-height:1.52;max-width:none}
+  .hero-ctas{display:grid;grid-template-columns:1fr;gap:9px;margin-top:20px}
   .hero-ctas .btn{width:100%;min-width:0;white-space:normal}
-  .trust-list{gap:10px 16px;margin-top:24px}
-  .trust-list li{font-size:14.5px}
-  .hero-frame{aspect-ratio:4/3;border-radius:14px}
-  .hero-card{position:static;max-width:none;margin-top:12px;padding:13px 14px}
+  .trust-list{gap:8px 14px;margin-top:20px}
+  .trust-list li{font-size:14px}
+  .hero-frame{aspect-ratio:16/10;border-radius:14px}
+  .hero-card{position:static;max-width:none;margin-top:10px;padding:12px 13px}
   .hero-card .ic{width:38px;height:38px}
-  .stats{padding:0 0 50px}
-  .stat{padding:22px 16px 20px}
-  .stat-num{font-size:34px}
+  .stats{padding:0 0 38px}
+  .stat{padding:18px 14px 16px}
+  .stat-num{font-size:32px}
   .stat-label{font-size:14px;margin-top:8px}
   .about-copy p{font-size:16px}
-  .statement blockquote{font-size:28px}
-  .exp{grid-template-columns:44px 1fr;gap:14px;padding:22px 0}
-  .exp .ic{width:44px;height:44px;border-radius:12px}
-  .exp .ic svg{width:24px;height:24px}
-  .exp h3,.why h3{font-size:19px}
-  .why{padding:24px 22px}
-  .why .ic{width:44px;height:44px;margin-bottom:16px}
-  .why .ic svg{width:36px;height:36px}
-  .step{grid-template-columns:44px 1fr;gap:14px;padding-bottom:22px}
-  .step-dot{width:44px;height:44px;font-size:15px}
-  .proc-line{left:21px}
+  .statement{padding:24px 20px}
+  .statement blockquote{font-size:24px}
+  .exp{grid-template-columns:40px 1fr;gap:13px;padding:18px 0}
+  .exp .ic{width:40px;height:40px;border-radius:11px}
+  .exp .ic svg{width:22px;height:22px}
+  .exp h3,.why h3{font-size:18px}
+  .exp p,.why p{font-size:14.5px;line-height:1.48}
+  .why-grid{gap:12px}
+  .why{padding:16px 15px;display:grid;grid-template-columns:38px 1fr;gap:5px 12px;align-items:start}
+  .why .ic{width:38px;height:38px;margin-bottom:0;grid-row:1/3}
+  .why .ic svg{width:28px;height:28px}
+  .why h3{align-self:center}
+  .step{grid-template-columns:40px 1fr;gap:12px;padding-bottom:18px}
+  .step-dot{width:40px;height:40px;font-size:14px}
+  .proc-line{left:19px}
   .step h3{font-size:18px}
-  .pr{padding:18px 0}
-  .pr h3{font-size:24px;gap:12px}
+  .pr{padding:14px 0}
+  .pr h3{font-size:21px;gap:10px}
   .pr p{font-size:15.5px}
   .car::before,.car::after{width:32px}
   .logo-tile{width:150px;height:122px;padding:14px}
   .logo-tile img{max-height:76px}
   .logo-tile .nm{font-size:12px}
-  .member-photo{aspect-ratio:16/11}
-  .member-body{padding:18px}
-  .member h3{font-size:20px}
-  .member .role{font-size:14.5px}
-  .member .div{margin:11px 0}
-  .member .xp{font-size:12.8px}
-  .member-read{min-height:42px}
-  .summary{padding:24px 20px}
-  .summary .big{font-size:52px}
-  .rev{padding:22px 20px}
-  .post{padding:24px 20px;margin-top:40px}
-  .post h3{font-size:25px}
+  .team-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .member{border-radius:10px}
+  .member-featured{grid-column:auto}
+  .member-photo{aspect-ratio:4/5}
+  .member-photo img{object-position:center 12%}
+  .member-featured .member-photo{aspect-ratio:4/5}
+  .member-body{padding:11px 10px 12px}
+  .member h3{font-size:15.5px;line-height:1.18}
+  .member-featured h3{font-size:15.5px}
+  .member .role{font-size:12.2px;line-height:1.25}
+  .member-featured .role{font-size:12.2px}
+  .member .div{width:30px;margin:7px 0}
+  .member .xp{font-size:10.8px;line-height:1.2;padding:3px 7px}
+  .member-featured .xp{font-size:10.8px}
+  .member-read{min-height:34px;padding:7px 8px;font-size:12.5px}
+  .member-featured .member-read{padding-inline:8px}
+  .summary{padding:20px 18px}
+  .summary .big{font-size:46px}
+  .rev{padding:18px 16px}
+  .post{padding:20px 17px;margin-top:30px}
+  .post h3{font-size:22px}
   .post p{font-size:15.5px}
   .post .btn{width:100%}
   .acc-btn{font-size:17px;padding:18px 0}
   .acc-panel p{padding-right:0}
   .final .bigE,.final .circ{display:none}
-  .final h2{font-size:30px}
+  .final h2{font-size:28px}
   .final p{font-size:16px;margin-top:16px}
   .final .ctas{display:grid;grid-template-columns:1fr;gap:10px;margin-top:26px}
   .final .ctas .btn{width:100%;white-space:normal}
   .cinfo{gap:14px;margin-top:22px}
   .cinfo li{grid-template-columns:42px 1fr;gap:12px}
   .cinfo .ic{width:42px;height:42px}
-  .form-card{padding:22px 18px}
+  .form-card{padding:19px 16px}
   .fld textarea{min-height:104px}
   .form-foot .btn{width:100%}
-  .ftr{padding-top:50px}
-  .ftr-top{grid-template-columns:1fr;gap:28px}
+  .ftr{padding-top:42px}
+  .ftr-top{grid-template-columns:1fr;gap:24px}
   .ftr .plate .brand-logo{width:190px}
   .ftr .plate .brand-logo>span{font-size:42px}
   .ftr-bot{margin-top:36px}
@@ -642,6 +662,11 @@ p{margin:0}
   .modal-h h3{font-size:22px}
   .modal-b{padding:16px 20px 22px}
   .btn{min-height:44px;padding:11px 16px;font-size:15px}
+  .tabs{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tabs button{padding:8px 6px;font-size:13.5px}
+  .media-grid{grid-template-columns:1fr 1fr;gap:9px}
+  .mtile{border-radius:10px}
+  .mtile .cap{font-size:12.5px;padding:24px 9px 8px}
 }
 .rev-photos button.vthumb{position:relative;cursor:pointer}
 .rev-photos button.vthumb::after{content:"";position:absolute;inset:0;background:rgba(0,30,70,.35)}

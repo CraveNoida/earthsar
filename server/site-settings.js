@@ -120,14 +120,14 @@ function cleanSeo(seo = {}) {
 }
 
 function cleanTeam(team = []) {
-  return (Array.isArray(team) ? team : []).slice(0, 4).map(member => ({
+  return (Array.isArray(team) ? team : []).slice(0, 8).map(member => ({
     name: text(member.name, 120),
     role: text(member.role, 120),
     experience: text(member.experience, 160),
     bio: text(member.bio, 3000),
     photo: text(member.photo, 300),
     linkedin: text(member.linkedin, 300)
-  }));
+  })).filter(member => member.name || member.role || member.experience || member.bio || member.photo || member.linkedin);
 }
 
 function sanitizeSiteSettings(input = {}) {

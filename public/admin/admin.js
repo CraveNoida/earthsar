@@ -8,6 +8,8 @@ const stars = n => `<span class="stars sm" aria-label="${n} out of 5 stars">${[1
 const fmt = t => t ? new Date(t).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
 const main = $("#main");
 const state = { me: null, stats: null, reviews: [], gallery: [], enquiries: [], settings: null };
+const MIN_ADVISOR_EDITORS = 4;
+const MAX_ADVISOR_EDITORS = 8;
 
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 3000); }
 
@@ -510,6 +512,7 @@ function advisorEditor(member, i) {
 
 function drawSettingsForm() {
   const s = state.settings || {}, c = s.contact || {}, st = s.stats || {}, h = s.hero || {}, seo = s.seo || {}, team = s.team || [];
+  const advisorCount = Math.min(MAX_ADVISOR_EDITORS, Math.max(MIN_ADVISOR_EDITORS, team.length));
   const phone = c.phone || c.whatsapp || "+91 890 176 0000";
   const whatsapp = c.whatsapp || c.phone || "+91 890 176 0000";
   const email = c.email || "earthzgroup@gmail.com";
@@ -564,7 +567,7 @@ function drawSettingsForm() {
     </section>
     <section>
       <h2>Advisor Profiles</h2>
-      <div class="advisor-grid">${[0, 1, 2, 3].map(i => advisorEditor(team[i] || {}, i)).join("")}</div>
+      <div class="advisor-grid">${Array.from({ length: advisorCount }, (_, i) => advisorEditor(team[i] || {}, i)).join("")}</div>
     </section>
     <div class="form-foot settings-foot"><span class="note-err" id="settingsErr" role="alert"></span><button class="btn btn-primary" id="settingsBtn" type="submit">Save website details</button></div>
   </form>`;
@@ -631,7 +634,7 @@ async function saveSettingsForm(e) {
       twitterTitle: settingsValue(form, "seo.twitterTitle"),
       twitterDescription: settingsValue(form, "seo.twitterDescription")
     },
-    team: [0, 1, 2, 3].map(i => ({
+    team: Array.from({ length: $$(".settings-advisor", form).length }, (_, i) => ({
       name: settingsValue(form, `team.${i}.name`),
       role: settingsValue(form, `team.${i}.role`),
       experience: settingsValue(form, `team.${i}.experience`),
